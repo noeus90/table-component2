@@ -17,6 +17,7 @@ class App extends React.Component {
     const cols = [1, 2, 3];
     return (
       <div>
+        Test
         <div id="settings" className="section">
           <p>
             <label>{"StickyHeader: "}</label>
