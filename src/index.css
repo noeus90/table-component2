@@ -18,6 +18,7 @@ body {
 
 #container200{
   max-height: 200px;
+  padding: 10px;
 }
 
 
@@ -66,6 +67,9 @@ table tbody.scrollable
   height: 160px;  /* FIXME */
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
 .white {
   background: white;
 }
@@ -76,6 +80,14 @@ table tbody.scrollable
 
 .mini {
   font-size: 10px;
+}
+
+.afterRow{
+  display:table-footer-group;
+}
+.afterRow > div{
+  padding: 10px;
+  border: 1px solid black;
 }
 
 .dropbtn {
@@ -95,14 +107,14 @@ table tbody.scrollable
   position: absolute;
   background-color: #f1f1f1;
   min-width: 160px;
-  bottom: -75px;
+  top: 0px;
   left: -160px;
   z-index: 1;
 }
 
 .dropup-content p {
   color: black;
-  padding: 12px 16px;
+  padding: 6px 8px;
   text-decoration: none;
   display: block;
 }
