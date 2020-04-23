@@ -1,0 +1,114 @@
+body {
+  padding: 20px;
+  font-family: Helvetica;
+}
+
+#app {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  transition: all 0.2s;
+  padding: 20px;
+  font-family: Helvetica;
+}
+
+#settings{
+  padding: 10px;
+}
+
+#container200{
+  max-height: 200px;
+}
+
+
+.tableContainer{
+  height: 200px; /* FIXME to MatchParent */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.section{
+  background: #e8e8e8;
+  border: 1px dotted black;
+  border-radius: 5px;
+  width: 100%;
+}
+
+tr > * {
+  padding: 5px;
+  border: 1px solid black;
+}
+
+th {
+  background-color: #5e9cff;
+}
+
+
+
+table, tr, thead, tbody {
+  width: 100%;
+}
+
+#container200  tr{
+  display: inline-table;
+}
+
+
+#container200 table tbody, table thead
+{
+    display: block;
+}
+
+table tbody.scrollable
+{
+  overflow-y: overlay;
+  overflow-x: hidden;
+  height: 160px;  /* FIXME */
+}
+
+.white {
+  background: white;
+}
+
+.green {
+  background: #e4edd8;
+}
+
+.mini {
+  font-size: 10px;
+}
+
+.dropbtn {
+  background-color: transparent;
+  padding: 2px;
+  font-size: 16px;
+  border: none;
+}
+
+.dropup {
+  position: relative;
+  display: inline-block;
+}
+
+.dropup-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  bottom: -75px;
+  left: -160px;
+  z-index: 1;
+}
+
+.dropup-content p {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropup-content p:hover {background-color: #ccc}
+
+.dropup:hover .dropup-content {
+  display: block;
+}
