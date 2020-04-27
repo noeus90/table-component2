@@ -54,14 +54,19 @@ class Table extends React.Component {
     });
     return (
       <div className="tableContainer">
-        <label>
-          Filtros{" "}
-          <input
-            type="checkbox"
-            value={this.state.showFilters}
-            onChange={evt => this.setState({ showFilters: evt.target.checked })}
-          />
-        </label>
+        <p>
+          <label>
+            Filtros{" "}
+            <input
+              type="checkbox"
+              value={this.state.showFilters}
+              onChange={evt =>
+                this.setState({ showFilters: evt.target.checked })
+              }
+            />
+          </label>
+        </p>
+
         {
           <FiltersContainer
             visible={this.state.showFilters}
@@ -70,12 +75,13 @@ class Table extends React.Component {
             widths={widths}
           />
         }
+
         <table>
           <thead>
             <tr>
               {this.props.children.map((column, i) => {
                 return React.cloneElement(column, {
-                  key:column.props.dataKey,
+                  key: column.props.dataKey,
                   width: widths[i],
                   sortCb: this.sort
                 });

@@ -17,7 +17,7 @@ class Column extends React.Component {
 
   render() {
     return (
-      <th style={{ width: this.props.width }}>
+      <td style={{ width: this.props.width }} className="header">
         <span>{this.props.name}</span>
         {this.props.sortable && (
           <button
@@ -29,7 +29,7 @@ class Column extends React.Component {
             {this.state.orderAsc ? "↓" : "↑"}
           </button>
         )}
-      </th>
+      </td>
     );
   }
 

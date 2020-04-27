@@ -12,23 +12,22 @@ body {
   font-family: Helvetica;
 }
 
-#settings{
+#settings {
   padding: 10px;
 }
 
-#container200{
+#container200 {
   max-height: 200px;
   padding: 10px;
 }
 
-
-.tableContainer{
+.tableContainer {
   height: 200px; /* FIXME to MatchParent */
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.section{
+.section {
   background: #e8e8e8;
   border: 1px dotted black;
   border-radius: 5px;
@@ -37,34 +36,44 @@ body {
 
 tr > * {
   padding: 5px;
-  border: 1px solid black;
 }
 
 th {
   background-color: #5e9cff;
 }
 
+td.header {
+  background-color: #5e9cff;
+  font-weight: bold;
+}
+tr {
+  border-bottom: 1px solid black;
+}
 
+table {
+  border-collapse: collapse;
+}
 
-table, tr, thead, tbody {
+table,
+tr,
+thead,
+tbody {
   width: 100%;
 }
 
-#container200  tr{
+#container200 tr {
   display: inline-table;
 }
 
-
-#container200 table tbody, table thead
-{
-    display: block;
+#container200 table tbody,
+table thead {
+  display: block;
 }
 
-table tbody.scrollable
-{
+table tbody.scrollable {
   overflow-y: overlay;
   overflow-x: hidden;
-  height: 160px;  /* FIXME */
+  height: 160px; /* FIXME */
 }
 
 ::-webkit-scrollbar {
@@ -82,10 +91,10 @@ table tbody.scrollable
   font-size: 10px;
 }
 
-.afterRow{
-  display:table-footer-group;
+.afterRow {
+  display: table-footer-group;
 }
-.afterRow > div{
+.afterRow > div {
   padding: 10px;
   border: 1px solid black;
 }
@@ -119,7 +128,9 @@ table tbody.scrollable
   display: block;
 }
 
-.dropup-content p:hover {background-color: #ccc}
+.dropup-content p:hover {
+  background-color: #ccc;
+}
 
 .dropup:hover .dropup-content {
   display: block;
