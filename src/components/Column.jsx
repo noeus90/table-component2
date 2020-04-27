@@ -9,8 +9,10 @@ class Column extends React.Component {
     };
     //console.log(props);
     this.defaultSortFn = this.defaultSortFn.bind(this);
-    this.getItemsToSort = this.getItemsToSort.bind(this);
+    this.getValueFromRow = this.getValueFromRow.bind(this);
     this.sortFn = this.sortFn.bind(this);
+    this.defaultSortFn = this.defaultSortFn.bind(this);
+    this.filterFn = this.filterFn.bind(this);
   }
 
   render() {
@@ -31,25 +33,28 @@ class Column extends React.Component {
     );
   }
 
-  getItemsToSort(rowA,rowB){
-    let valueA, valueB;
-
-    if (typeof this.props.dataKey === "function") {
-      valueA = this.props.dataKey(rowA);
-      valueB = this.props.dataKey(rowB);
-    } else {
-      valueA = rowA[this.props.dataKey];
-      valueB = rowB[this.props.dataKey];
-    }
-    return {valueA,valueB};
+  getValueFromRow(row) {
+    return typeof this.props.dataKey === "function"
+      ? this.props.dataKey(row)
+      : row[this.props.dataKey];
   }
 
-  sortFn(a, b){
-    let {valueA, valueB} = this.getItemsToSort(a,b);
-    if(this.props.sortFn){
-      return this.props.sortFn(valueA, valueB)
-    }else{
-      return this.defaultSortFn(valueA, valueB)
+  sortFn(a, b) {
+    let valueA = this.getValueFromRow(a);
+    let valueB = this.getValueFromRow(b);
+    if (this.props.sortFn) {
+      return this.props.sortFn(valueA, valueB);
+    } else {
+      return this.defaultSortFn(valueA, valueB);
+    }
+  }
+
+  filterFn(a, data){
+    let valueA = this.getValueFromRow(a);
+    if (this.props.sortFn) {
+      return this.props.sortFn(valueA, data);
+    } else {
+      return this.defaultSortFn(valueA, data);
     }
   }
 
@@ -61,6 +66,10 @@ class Column extends React.Component {
       return 1;
     }
     return 0;
+  }
+
+  defaultFilterFn(a, data) {
+    return a.includes(data);
   }
 }
 

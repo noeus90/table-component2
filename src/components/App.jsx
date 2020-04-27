@@ -9,7 +9,8 @@ class App extends React.Component {
       zebraStyle: true,
       stickyHeader: false,
       weight: [],
-      sortable: []
+      sortable: [],
+      filtrable: []
     };
   }
 
@@ -50,6 +51,7 @@ class App extends React.Component {
                 {cols.map(i => (
                   <td>
                     <input
+                      style={{ width: "40px" }}
                       type="number"
                       value={this.state.weight[i] || 1}
                       onChange={evt => {
@@ -77,6 +79,22 @@ class App extends React.Component {
                   </td>
                 ))}
               </tr>
+              <tr>
+                <th>filterable</th>
+                {cols.map(i => (
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={this.state.filtrable[i]}
+                      onChange={evt => {
+                        const filtrable = this.state.filtrable;
+                        filtrable[i] = !filtrable[i];
+                        this.setState({ filtrable: filtrable });
+                      }}
+                    />
+                  </td>
+                ))}
+              </tr>
             </table>
           </p>
         </div>
@@ -87,6 +105,7 @@ class App extends React.Component {
             stickyHeader={this.state.stickyHeader}
             zebraStyle={this.state.zebraStyle}
             afterRow={row => "My default after row: Name → " + row.nombre}
+            globalFilter={this.state.globalFilter}
             actions={[
               {
                 text: "apellido",
@@ -109,30 +128,39 @@ class App extends React.Component {
                     <div>
                       Dynamic after row: Letra dni → {row.dni.letra}
                       <button onClick={utils.closeAfterRow}>x</button>
-                     </div>
+                    </div>
                   )
               }
             ]}
           >
             <Column
               name="Nombre"
+              type="text"
               dataKey={row => row.alias || row.nombre}
               weight={this.state.weight[1] || 1}
               sortable={this.state.sortable[1]}
+              filtrable={this.state.filtrable[1]}
             />
 
             <Column
               name="Apellido"
+              type="text"
               dataKey="apellido"
               weight={this.state.weight[2] || 1}
               sortable={this.state.sortable[2]}
+              filtrable={this.state.filtrable[2]}
               treatment={obj => <b>{obj && "*** " + obj + " ***"}</b>}
             />
 
             <Column
               name="Documento de identidad"
+              type="text"
               dataKey="dni"
               sortable={this.state.sortable[3]}
+              filtrable={this.state.filtrable[3]}
+              filterFn={(obj, constraint) =>
+                !constraint.checked || obj.letra === "A"}
+              filterView={<input type="checkbox" />}
               sortFn={(a, b) =>
                 b.letra === a.letra ? 0 : b.letra > a.letra ? 1 : -1
               }
@@ -166,17 +194,17 @@ const data = [
   {
     nombre: "Pepe",
     apellido: "Castro",
-    dni: { numero: "111", letra: "S" }
+    dni: { numero: "111", letra: "A" }
   },
   {
     nombre: "María",
     apellido: "Magdalena",
-    dni: { numero: "000", letra: "P" }
+    dni: { numero: "000", letra: "B" }
   },
   {
     nombre: "Sinosuke",
     apellido: "Nohara",
-    dni: { numero: "222", letra: "L" }
+    dni: { numero: "222", letra: "C" }
   },
   {
     nombre: "Batman",
@@ -184,7 +212,7 @@ const data = [
   },
   {
     nombre: "Spiderman",
-    dni: { numero: "999", letra: "S" }
+    dni: { numero: "999", letra: "A" }
   }
 ];
 
