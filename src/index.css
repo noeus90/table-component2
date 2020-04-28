@@ -32,10 +32,15 @@ body {
   border: 1px dotted black;
   border-radius: 5px;
   width: 100%;
+  position: relative;
 }
 
 tr > * {
   padding: 5px;
+}
+
+Draggable{
+  background-color:red;
 }
 
 th {

@@ -1,6 +1,7 @@
 import React from "react";
 import Table from "./Table";
 import Column from "./Column";
+import Draggable from "react-draggable";
 
 class App extends React.Component {
   constructor(props) {
@@ -11,8 +12,13 @@ class App extends React.Component {
       weight: [],
       sortable: [],
       filtrable: [],
+      drag: { x: 0, y: 0 }
     };
   }
+
+  onControlledDrag = (e, position) => {
+    this.setState({ drag: position });
+  };
 
   render() {
     const cols = [1, 2, 3];
@@ -159,7 +165,8 @@ class App extends React.Component {
               sortable={this.state.sortable[3]}
               filtrable={this.state.filtrable[3]}
               filterFn={(obj, constraint) =>
-                !constraint.checked || obj.letra === "A"}
+                !constraint.checked || obj.letra === "A"
+              }
               filterView={<input type="checkbox" />}
               sortFn={(a, b) =>
                 b.letra === a.letra ? 0 : b.letra > a.letra ? 1 : -1
@@ -168,6 +175,38 @@ class App extends React.Component {
               treatment={obj => <span>{obj.numero + obj.letra}</span>}
             />
           </Table>
+        </div>
+        <br />
+        <p>Drag the bar</p>
+        <div className="section">
+          <span
+            style={{
+              display: "inline-block",
+              border: "1px solid black",
+              position: "relative"
+            }}
+          >
+            Header 1
+          </span>
+          <Draggable
+            axis="x"
+            bounds="parent"
+            onDrag={this.onControlledDrag}
+          >
+            <div style={{ width: "min-content", display: "inline-block" ,position: "relative"}}>
+              <b style={{ color: "red", cursor: "ew-resize" }}>|</b>
+            </div>
+          </Draggable>
+          <span
+            style={{
+              display: "inline-block",
+              border: "1px solid black",
+              left:this.state.drag.x,
+              position: "relative"
+            }}
+          >
+            Header 2
+          </span>
         </div>
       </div>
     );
