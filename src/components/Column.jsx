@@ -16,6 +16,7 @@ class Column extends React.Component {
   }
 
   render() {
+    if (!this.props.visible) return null;
     return (
       <td style={{ width: this.props.width }} className="header">
         <span>{this.props.name}</span>
@@ -49,7 +50,7 @@ class Column extends React.Component {
     }
   }
 
-  filterFn(a, data){
+  filterFn(a, data) {
     let valueA = this.getValueFromRow(a);
     if (this.props.sortFn) {
       return this.props.sortFn(valueA, data);

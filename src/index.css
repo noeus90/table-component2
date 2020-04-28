@@ -54,6 +54,11 @@ table {
   border-collapse: collapse;
 }
 
+table.filterContainer {
+  background-color:lightgray;
+  border-radius: 5px;
+}
+
 table,
 tr,
 thead,

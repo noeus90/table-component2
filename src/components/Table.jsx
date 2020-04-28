@@ -4,16 +4,21 @@ import Cell from "./Cell";
 import Column from "./Column";
 import Filters from "./filters/Filters";
 import FiltersContainer from "./filters/FiltersContainer";
+import ShowHideFilter from "./filters/ShowHideFilter";
 
 class Table extends React.Component {
   constructor(props) {
     super(props);
-    //console.log(props);
+    console.log(props);
 
     this.state = {
       rows: this.props.data.map(row => ({
         row: row,
         extra: { visible: true }
+      })),
+      cols: props.children.map((column,i) => ({
+        name: column.props.name,
+        extra: { visible: true, filtrable: ()=> this.props.children[i].props.filtrable}
       })),
       customAfterRow: [],
       showFilters: false
@@ -50,7 +55,21 @@ class Table extends React.Component {
   render() {
     const widths = this.calculateWidths();
     this.props.children.forEach(column => {
-      this.filters.addFilter(column);
+      this.filters.addFilter(column.props);
+    });
+    this.filters.addFilter({
+      type: "text",
+      name: "Hide columns",
+      filterView: (
+        <ShowHideFilter columns={this.props.children.map(c => c.props.name)} />
+      ),
+      filterFn: (rows, constraint) => {
+        this.state.cols.forEach(
+          (col, i) => (col.extra.visible = !constraint[i])
+        );
+        return true;
+      },
+      filtrable: true
     });
     return (
       <div className="tableContainer">
@@ -70,7 +89,7 @@ class Table extends React.Component {
         {
           <FiltersContainer
             visible={this.state.showFilters}
-            columns={this.props.children}
+            columns={this.state.cols}
             filters={this.filters.getFilters()}
             widths={widths}
           />
@@ -83,7 +102,8 @@ class Table extends React.Component {
                 return React.cloneElement(column, {
                   key: column.props.dataKey,
                   width: widths[i],
-                  sortCb: this.sort
+                  sortCb: this.sort,
+                  visible: this.state.cols[i].extra.visible
                 });
               })}
               {this.props.actions && (
@@ -118,7 +138,12 @@ class Table extends React.Component {
                       value = column.props.treatment(value);
                     }
                     return (
-                      <Cell key={i + "-" + j} value={value} width={widths[j]} />
+                      <Cell
+                        key={i + "-" + j}
+                        value={value}
+                        width={widths[j]}
+                        visible={this.state.cols[j].extra.visible}
+                      />
                     );
                   })}
                   {this.props.actions &&

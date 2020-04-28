@@ -5,19 +5,29 @@ class FiltersContainer extends React.Component {
   /* eslint-disable no-useless-constructor*/
   constructor(props) {
     super(props);
-    console.log(this.props.columns[0].props);
+    console.log(props)
   }
 
   render() {
     if (!this.props.visible) return null;
     return (
-      <table>
+      <table className="filterContainer">
+         <tr>
+          {Object.values(this.props.filters.global).map((f, i) => {
+            return (
+              <td key={"td"+i}>
+                {f.view}
+              </td>
+            );
+          })}
+        </tr>
         <tr>
           {this.props.widths.map((w, i) => {
+            if(this.props.columns[i] && !this.props.columns[i].extra.visible) return null;
             return (
               <td style={{ width: w }} key={"td"+i}>
-                {this.props.columns[i] && this.props.columns[i].props.filtrable &&
-                  this.props.filters[this.props.columns[i].props.name].view}
+                {this.props.columns[i] && this.props.columns[i].extra.filtrable() &&
+                  this.props.filters.column[this.props.columns[i].name].view}
               </td>
             );
           })}
