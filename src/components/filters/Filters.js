@@ -27,7 +27,7 @@ class Filters {
   }
 
   getFilters() {
-    return this.filters; //TODO distingir filtros globales de columna
+    return this.filters;
   }
 
   _getDefaultFilter(type, tag) {
@@ -64,9 +64,8 @@ class Filters {
   filter() {
     this.dataFn().forEach(row => {
       row.extra.visible = Object.values(this.filters.global).every(filter => {
-        const { key, fn, constraint } = filter;
-        const value = typeof key === "function" ? key(row.row) : row.row[key];
-        return fn(value, constraint);
+        const {fn, constraint } = filter;
+        return fn(row.row, constraint);
       });
       row.extra.visible =
         row.extra.visible &&

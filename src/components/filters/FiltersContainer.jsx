@@ -9,9 +9,8 @@ class FiltersContainer extends React.Component {
   }
 
   render() {
-    if (!this.props.visible) return null;
     return (
-      <table className="filterContainer">
+      <table className={this.props.visible ? "filterContainer" :"hide"}>
          <tr>
           {Object.values(this.props.filters.global).map((f, i) => {
             return (

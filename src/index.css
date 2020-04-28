@@ -96,6 +96,10 @@ table tbody.scrollable {
   font-size: 10px;
 }
 
+.hide{
+  display: none;
+}
+
 .afterRow {
   display: table-footer-group;
 }
