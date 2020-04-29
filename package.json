@@ -7,7 +7,8 @@
   "dependencies": {
     "react": "15.5.3",
     "react-dom": "15.5.3",
-    "react-draggable": "4.3.1"
+    "react-draggable": "4.3.1",
+    "react-visibility-sensor": "5.1.1"
   },
   "devDependencies": {
     "react-scripts": "1.0.0"

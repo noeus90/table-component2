@@ -119,7 +119,6 @@ table tbody.scrollable {
 }
 .afterRow > div {
   padding: 10px;
-  border: 1px solid black;
 }
 
 .dropbtn {
