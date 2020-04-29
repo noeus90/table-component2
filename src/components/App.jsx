@@ -11,6 +11,7 @@ class App extends React.Component {
       zebraStyle: true,
       stickyHeader: false,
       pagination: false,
+      rowDensity: "default",
       weight: [],
       sortable: [],
       filtrable: [],
@@ -28,32 +29,62 @@ class App extends React.Component {
       <div>
         <div id="settings" className="section">
           <p>
-            <label>{"StickyHeader: "}</label>
-            <input
-              type="checkbox"
-              checked={this.state.stickyHeader}
-              onChange={() =>
-                this.setState({ stickyHeader: !this.state.stickyHeader })
-              }
-            />
-            <br />
-            <label>{"ZebraStyle: "}</label>
-            <input
-              type="checkbox"
-              checked={this.state.zebraStyle}
-              onChange={() =>
-                this.setState({ zebraStyle: !this.state.zebraStyle })
-              }
-            />
-            <br />
-            <label>{"Pagination: "}</label>
-            <input
-              type="checkbox"
-              checked={this.state.pagination}
-              onChange={() =>
-                this.setState({ pagination: !this.state.pagination })
-              }
-            />
+            <table>
+              <tr>
+                <td>StickyHeader</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={this.state.stickyHeader}
+                    onChange={() =>
+                      this.setState({ stickyHeader: !this.state.stickyHeader })
+                    }
+                  />
+                </td>
+                <td>RowDensity</td>
+                <td>
+                  <select
+                    value={this.state.rowDensity}
+                    onChange={evt =>
+                      this.setState({ rowDensity: evt.target.value })
+                    }
+                  >
+                    <option>default</option>
+                    <option>compact</option>
+                    <option>comfortable</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>ZebraStyle</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={this.state.zebraStyle}
+                    onChange={() =>
+                      this.setState({ zebraStyle: !this.state.zebraStyle })
+                    }
+                  />
+                </td>
+                <td />
+                <td />
+              </tr>
+              <tr>
+                <td>Pagination</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={this.state.pagination}
+                    onChange={() =>
+                      this.setState({ pagination: !this.state.pagination })
+                    }
+                  />
+                </td>
+                <td />
+                <td />
+              </tr>
+            </table>
+
             <br />
             <table>
               <tr>
@@ -65,7 +96,7 @@ class App extends React.Component {
               <tr>
                 <th>weight</th>
                 {cols.map(i => (
-                  <td>
+                  <th>
                     <input
                       style={{ width: "40px" }}
                       type="number"
@@ -76,13 +107,13 @@ class App extends React.Component {
                         this.setState({ weight: weight });
                       }}
                     />
-                  </td>
+                  </th>
                 ))}
               </tr>
               <tr>
                 <th>sortable</th>
                 {cols.map(i => (
-                  <td>
+                  <th>
                     <input
                       type="checkbox"
                       checked={this.state.sortable[i]}
@@ -92,13 +123,13 @@ class App extends React.Component {
                         this.setState({ sortable: sortable });
                       }}
                     />
-                  </td>
+                  </th>
                 ))}
               </tr>
               <tr>
                 <th>filterable</th>
                 {cols.map(i => (
-                  <td>
+                  <th>
                     <input
                       type="checkbox"
                       checked={this.state.filtrable[i]}
@@ -108,7 +139,7 @@ class App extends React.Component {
                         this.setState({ filtrable: filtrable });
                       }}
                     />
-                  </td>
+                  </th>
                 ))}
               </tr>
             </table>
@@ -123,6 +154,7 @@ class App extends React.Component {
             afterRow={row => "My default after row: Name → " + row.nombre}
             globalFilter={this.state.globalFilter}
             pagination={this.state.pagination && { pageSize: 2 }}
+            rowDensity={this.state.rowDensity}
             actions={[
               {
                 text: "apellido",

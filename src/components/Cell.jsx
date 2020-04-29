@@ -12,7 +12,7 @@ class Cell extends React.Component {
     if (!this.props.visible) return null;
     return (
       <td {...this.props} style={{ width: this.props.width }}>
-        {this.props.value}
+          {this.props.value}
       </td>
     );
   }

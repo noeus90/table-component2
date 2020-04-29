@@ -39,11 +39,20 @@ tr > * {
   padding: 5px;
 }
 
-tr.default{
-  height:"40px";
+td.default{
+  height: 20px;
 }
-Draggable{
-  background-color:red;
+
+td.default{
+  height: 30px;
+}
+
+td.compact{
+  height: 20px;
+}
+
+td.comfortable{
+  height: 40px;
 }
 
 th {
@@ -54,7 +63,8 @@ td.header {
   background-color: #5e9cff;
   font-weight: bold;
 }
-tr {
+
+table.visibleRows tr {
   border-bottom: 1px solid black;
 }
 

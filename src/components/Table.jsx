@@ -22,7 +22,7 @@ class Table extends React.Component {
       })),
       customAfterRow: [],
       showFilters: false,
-      pageSize: this.props.pagination.pageSize,
+      pageSize: this.props.pagination.pageSize || 2,
       currentPage: 0
     };
     this.sort = this.sort.bind(this);
@@ -35,7 +35,7 @@ class Table extends React.Component {
   recursive = () => {
     setTimeout(() => {
       let hasMore = this.state.rows.length + 1 < this.props.data.length;
-      this.setState( (prev, props) => ({
+      this.setState((prev, props) => ({
         rows: props.data.slice(0, prev.rows.length + 1).map(row => ({
           row: row,
           extra: { visible: true }
@@ -43,11 +43,11 @@ class Table extends React.Component {
       }));
       if (hasMore) this.recursive();
     }, 0);
-  }
+  };
 
   componentDidMount() {
     this.recursive();
- }
+  }
 
   calculateWeightSum() {
     let weightSum = 0;
@@ -150,7 +150,7 @@ class Table extends React.Component {
           />
         }
 
-        <table>
+        <table className="visibleRows">
           <thead>
             <tr>
               {this.props.children.map((column, i) => {
@@ -189,7 +189,7 @@ class Table extends React.Component {
               return [
                 <tr
                   key={i}
-                  className={"default "+ this.props.zebraStyle && i % 2 ? "green" : "white"}
+                  className={this.props.zebraStyle && i % 2 ? "green" : "white"}
                 >
                   {this.props.children.map((column, j) => {
                     //console.log(rowData);
@@ -207,6 +207,7 @@ class Table extends React.Component {
                     return (
                       <Cell
                         key={i + "-" + j}
+                        className={this.props.rowDensity}
                         value={value}
                         width={widths[j]}
                         visible={this.state.cols[j].extra.visible}
