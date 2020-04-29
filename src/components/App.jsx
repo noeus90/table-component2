@@ -9,6 +9,7 @@ class App extends React.Component {
     this.state = {
       zebraStyle: true,
       stickyHeader: false,
+      pagination: true,
       weight: [],
       sortable: [],
       filtrable: [],
@@ -44,7 +45,15 @@ class App extends React.Component {
               }
             />
             <br />
-
+            <label>{"Pagination: "}</label>
+            <input
+              type="checkbox"
+              checked={this.state.pagination}
+              onChange={() =>
+                this.setState({ pagination: !this.state.pagination })
+              }
+            />
+            <br />
             <table>
               <tr>
                 <td />
@@ -112,6 +121,7 @@ class App extends React.Component {
             zebraStyle={this.state.zebraStyle}
             afterRow={row => "My default after row: Name → " + row.nombre}
             globalFilter={this.state.globalFilter}
+            pagination={this.state.pagination && {pageSize:2}}
             actions={[
               {
                 text: "apellido",

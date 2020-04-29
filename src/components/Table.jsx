@@ -16,12 +16,17 @@ class Table extends React.Component {
         row: row,
         extra: { visible: true }
       })),
-      cols: props.children.map((column,i) => ({
+      cols: props.children.map((column, i) => ({
         name: column.props.name,
-        extra: { visible: true, filtrable: ()=> this.props.children[i].props.filtrable}
+        extra: {
+          visible: true,
+          filtrable: () => this.props.children[i].props.filtrable
+        }
       })),
       customAfterRow: [],
-      showFilters: false
+      showFilters: false,
+      pageSize: this.props.pagination.pageSize,
+      currentPage: 0
     };
     this.sort = this.sort.bind(this);
     this.buildActions = this.buildActions.bind(this);
@@ -53,6 +58,7 @@ class Table extends React.Component {
   }
 
   render() {
+    const pages = Math.ceil(this.props.data.length / this.state.pageSize);
     const widths = this.calculateWidths();
     this.props.children.forEach(column => {
       this.filters.addFilter(column.props);
@@ -73,6 +79,41 @@ class Table extends React.Component {
     });
     return (
       <div className="tableContainer">
+        <p className={this.props.pagination ? "" : "hide"}>
+          <label>
+            Rows per page:{" "}
+            <input
+              type="number"
+              value={this.state.pageSize}
+              onChange={evt =>
+                this.setState({ pageSize: parseInt(evt.target.value, 10) })
+              }
+              style={{ width: "40px" }}
+            />
+          </label>{" "}
+          <label>
+            Page:{" "}
+            <button
+              onClick={evt =>
+                this.setState({
+                  currentPage:
+                    this.state.currentPage && this.state.currentPage - 1
+                })
+              }
+            >
+              {"<"}
+            </button>
+            {this.state.currentPage + 1 + "/" + pages}
+            <button
+              onClick={evt =>
+                this.state.currentPage + 1 < pages &&
+                this.setState({ currentPage: this.state.currentPage + 1 })
+              }
+            >
+              {">"}
+            </button>
+          </label>
+        </p>
         <p>
           <label>
             Filtros{" "}
@@ -117,6 +158,18 @@ class Table extends React.Component {
           </thead>
           <tbody className={this.props.stickyHeader ? "scrollable" : ""}>
             {this.state.rows.map((row, i) => {
+              if (
+                this.props.pagination &&
+                i < this.state.currentPage * this.state.pageSize
+              )
+                return null;
+              if (
+                this.props.pagination &&
+                i + 1 >
+                  this.state.currentPage * this.state.pageSize +
+                    this.state.pageSize
+              )
+                return null;
               if (!row.extra.visible) return null;
               const rowData = row.row;
               return [
