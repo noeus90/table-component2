@@ -79,7 +79,7 @@ Column.propTypes = {
   sortable: PropTypes.bool,
   sortFn: PropTypes.func,
   sortCb: PropTypes.func, //Internal use
-  dataKey: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired
+  dataKey: PropTypes.oneOfType([PropTypes.string, PropTypes.func])
 };
 
 module.exports = Column;

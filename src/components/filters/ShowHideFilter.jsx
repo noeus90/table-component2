@@ -13,13 +13,15 @@ class ShowHideFilter extends React.Component {
 
   render() {
     return (
-      <div>Hide => (
+      <div>
+        Hide => (
         {this.props.columns.map((c, i) => (
-          <label>
+          <label key={"c" + i}>
             {c}
             <input
               type="checkbox"
               checked={this.state.checked[i]}
+              value={this.state.checked[i]}
               onChange={evt => {
                 const checked = this.state.checked;
                 checked[i] = evt.target.checked;
@@ -30,7 +32,7 @@ class ShowHideFilter extends React.Component {
             />
           </label>
         ))}
-      )
+        )
       </div>
     );
   }
@@ -38,7 +40,7 @@ class ShowHideFilter extends React.Component {
 
 ShowHideFilter.propTypes = {
   columns: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func
 };
 
 module.exports = ShowHideFilter;

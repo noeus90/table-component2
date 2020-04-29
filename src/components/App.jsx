@@ -9,7 +9,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       zebraStyle: true,
-      stickyHeader: false,
+      stickyHeader: true,
       pagination: false,
       rowDensity: "default",
       weight: [],
@@ -28,8 +28,8 @@ class App extends React.Component {
     return (
       <div>
         <div id="settings" className="section">
-          <p>
-            <table>
+          <table>
+            <tbody>
               <tr>
                 <td>StickyHeader</td>
                 <td>
@@ -83,20 +83,22 @@ class App extends React.Component {
                 <td />
                 <td />
               </tr>
-            </table>
+            </tbody>
+          </table>
 
-            <br />
-            <table>
+          <br />
+          <table>
+            <tbody>
               <tr>
                 <td />
                 {cols.map(i => (
-                  <th>Column {i}</th>
+                  <th key={i}>Column {i}</th>
                 ))}
               </tr>
               <tr>
                 <th>weight</th>
                 {cols.map(i => (
-                  <th>
+                  <th key={i}>
                     <input
                       style={{ width: "40px" }}
                       type="number"
@@ -113,7 +115,7 @@ class App extends React.Component {
               <tr>
                 <th>sortable</th>
                 {cols.map(i => (
-                  <th>
+                  <th key={i}>
                     <input
                       type="checkbox"
                       checked={this.state.sortable[i]}
@@ -129,7 +131,7 @@ class App extends React.Component {
               <tr>
                 <th>filterable</th>
                 {cols.map(i => (
-                  <th>
+                  <th key={i}>
                     <input
                       type="checkbox"
                       checked={this.state.filtrable[i]}
@@ -142,8 +144,8 @@ class App extends React.Component {
                   </th>
                 ))}
               </tr>
-            </table>
-          </p>
+            </tbody>
+          </table>
         </div>
         <br />
         <div id="container200" className="section">
@@ -151,7 +153,7 @@ class App extends React.Component {
             data={data}
             stickyHeader={this.state.stickyHeader}
             zebraStyle={this.state.zebraStyle}
-            afterRow={row => "My default after row: Name → " + row.nombre}
+            afterRow={row => `My default after row: Name → ${row.nombre}`}
             globalFilter={this.state.globalFilter}
             pagination={this.state.pagination && { pageSize: 2 }}
             rowDensity={this.state.rowDensity}

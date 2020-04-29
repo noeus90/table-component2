@@ -342,8 +342,8 @@ Table.propTypes = {
     PropTypes.shape({
       text: PropTypes.string.isRequired,
       icon: PropTypes.string,
-      visible: PropTypes.oneOf([PropTypes.func, PropTypes.bool]),
-      enabled: PropTypes.oneOf([PropTypes.func, PropTypes.bool]),
+      visible: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+      enabled: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
       action: PropTypes.func.isRequired
     })
   ).isRequired
