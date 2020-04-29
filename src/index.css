@@ -39,6 +39,9 @@ tr > * {
   padding: 5px;
 }
 
+tr.default{
+  height:"40px";
+}
 Draggable{
   background-color:red;
 }

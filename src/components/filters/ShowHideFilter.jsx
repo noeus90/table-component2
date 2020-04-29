@@ -8,7 +8,7 @@ class ShowHideFilter extends React.Component {
     this.state = {
       checked: []
     };
-    console.log(props);
+    //console.log(props);
   }
 
   render() {

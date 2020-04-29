@@ -5,7 +5,7 @@ class FiltersContainer extends React.Component {
   /* eslint-disable no-useless-constructor*/
   constructor(props) {
     super(props);
-    console.log(props)
+    //console.log(props)
   }
 
   render() {

@@ -9,13 +9,10 @@ import ShowHideFilter from "./filters/ShowHideFilter";
 class Table extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
+    //console.log(props);
 
     this.state = {
-      rows: this.props.data.map(row => ({
-        row: row,
-        extra: { visible: true }
-      })),
+      rows: [],
       cols: props.children.map((column, i) => ({
         name: column.props.name,
         extra: {
@@ -34,6 +31,23 @@ class Table extends React.Component {
     this.buildUtils = this.buildUtils.bind(this);
     this.filters = new Filters(() => this.state.rows, () => this.forceUpdate());
   }
+
+  recursive = () => {
+    setTimeout(() => {
+      let hasMore = this.state.rows.length + 1 < this.props.data.length;
+      this.setState( (prev, props) => ({
+        rows: props.data.slice(0, prev.rows.length + 1).map(row => ({
+          row: row,
+          extra: { visible: true }
+        }))
+      }));
+      if (hasMore) this.recursive();
+    }, 0);
+  }
+
+  componentDidMount() {
+    this.recursive();
+ }
 
   calculateWeightSum() {
     let weightSum = 0;
@@ -175,7 +189,7 @@ class Table extends React.Component {
               return [
                 <tr
                   key={i}
-                  className={this.props.zebraStyle && i % 2 ? "green" : "white"}
+                  className={"default "+ this.props.zebraStyle && i % 2 ? "green" : "white"}
                 >
                   {this.props.children.map((column, j) => {
                     //console.log(rowData);

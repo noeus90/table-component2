@@ -2,6 +2,7 @@ import React from "react";
 import Table from "./Table";
 import Column from "./Column";
 import Draggable from "react-draggable";
+import data from "../data/easyTests";
 
 class App extends React.Component {
   constructor(props) {
@@ -9,7 +10,7 @@ class App extends React.Component {
     this.state = {
       zebraStyle: true,
       stickyHeader: false,
-      pagination: true,
+      pagination: false,
       weight: [],
       sortable: [],
       filtrable: [],
@@ -121,7 +122,7 @@ class App extends React.Component {
             zebraStyle={this.state.zebraStyle}
             afterRow={row => "My default after row: Name → " + row.nombre}
             globalFilter={this.state.globalFilter}
-            pagination={this.state.pagination && {pageSize:2}}
+            pagination={this.state.pagination && { pageSize: 2 }}
             actions={[
               {
                 text: "apellido",
@@ -198,12 +199,14 @@ class App extends React.Component {
           >
             Header 1
           </span>
-          <Draggable
-            axis="x"
-            bounds="parent"
-            onDrag={this.onControlledDrag}
-          >
-            <div style={{ width: "min-content", display: "inline-block" ,position: "relative"}}>
+          <Draggable axis="x" bounds="parent" onDrag={this.onControlledDrag}>
+            <div
+              style={{
+                width: "min-content",
+                display: "inline-block",
+                position: "relative"
+              }}
+            >
               <b style={{ color: "red", cursor: "ew-resize" }}>|</b>
             </div>
           </Draggable>
@@ -211,7 +214,7 @@ class App extends React.Component {
             style={{
               display: "inline-block",
               border: "1px solid black",
-              left:this.state.drag.x,
+              left: this.state.drag.x,
               position: "relative"
             }}
           >
@@ -222,47 +225,5 @@ class App extends React.Component {
     );
   }
 }
-
-const data = [
-  {
-    nombre: "David",
-    apellido: "Piñeiro",
-    dni: { numero: "123", letra: "A" }
-  },
-  {
-    nombre: "Noelia",
-    apellido: "Urrutia",
-    dni: { numero: "456", letra: "B" }
-  },
-  {
-    nombre: "Sergio",
-    apellido: "López",
-    dni: { numero: "789", letra: "C" },
-    alias: "This is my Alias"
-  },
-  {
-    nombre: "Pepe",
-    apellido: "Castro",
-    dni: { numero: "111", letra: "A" }
-  },
-  {
-    nombre: "María",
-    apellido: "Magdalena",
-    dni: { numero: "000", letra: "B" }
-  },
-  {
-    nombre: "Sinosuke",
-    apellido: "Nohara",
-    dni: { numero: "222", letra: "C" }
-  },
-  {
-    nombre: "Batman",
-    dni: { numero: "001", letra: "B" }
-  },
-  {
-    nombre: "Spiderman",
-    dni: { numero: "999", letra: "A" }
-  }
-];
 
 module.exports = App;
