@@ -31,11 +31,24 @@ class Table extends React.Component {
       pageSize: this.props.pagination.pageSize || 2,
       currentPage: 0,
       width: 0,
-      loading: false
+      interval: null
     };
-    this.interval = null;
     this.sort = this.sort.bind(this);
     this.filters = new Filters(() => this.state.rows, () => this.forceUpdate());
+    this.filters.addFilter({
+      type: "text",
+      name: "Hide columns",
+      filterView: (
+        <ShowHideFilter columns={this.props.children.map(c => c.props.name)} />
+      ),
+      filterFn: (rows, constraint) => {
+        this.state.cols.forEach(
+          (col, i) => (col.extra.visible = !constraint[i])
+        );
+        return true;
+      },
+      filtrable: true
+    });
     this.openAfterRow = this.openAfterRow.bind(this);
     this.buildUtils = this.buildUtils.bind(this);
     this.loadRows = this.loadRows.bind(this);
@@ -85,16 +98,19 @@ class Table extends React.Component {
   }
 
   loadRows() {
-    if (!this.interval) {
-      this.interval = setInterval(() => {
-        const rows = this.state.rows;
-        const idx = Math.floor(Math.random() * rows.length);
-        rows.splice(0, 0, rows[idx]);
-        this.setState({ rows: rows });
-      }, 10);
+    if (!this.state.interval) {
+      this.setState({
+        interval: setInterval(() => {
+          const rows = this.state.rows;
+          const idx = Math.floor(Math.random() * rows.length);
+          //rows.splice(0, 0, rows[idx]);
+          rows.push(rows[idx]);
+          this.setState({ rows: rows });
+        }, 100)
+      });
     } else {
-      clearInterval(this.interval);
-      this.interval = null;
+      clearInterval(this.state.interval);
+      this.setState({ interval: null });
     }
   }
 
@@ -111,25 +127,12 @@ class Table extends React.Component {
         : this.props.rowDensity === "compact"
         ? 10
         : 30);
-    this.filters.addFilter({
-      type: "text",
-      name: "Hide columns",
-      filterView: (
-        <ShowHideFilter columns={this.props.children.map(c => c.props.name)} />
-      ),
-      filterFn: (rows, constraint) => {
-        this.state.cols.forEach(
-          (col, i) => (col.extra.visible = !constraint[i])
-        );
-        return true;
-      },
-      filtrable: true
-    });
+
     return (
       <div className="tableContainer">
         <div className="table">
           <button onClick={this.loadRows}>
-            {this.state.loading ? "Stop " : "Start "}loading rows
+            {this.state.interval ? "Stop " : "Start "}loading rows
           </button>{" "}
           Rows: {this.state.rows.length}{" "}
         </div>
