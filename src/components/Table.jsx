@@ -104,9 +104,12 @@ class Table extends React.Component {
           const rows = this.state.rows;
           const idx = Math.floor(Math.random() * rows.length);
           //rows.splice(0, 0, rows[idx]);
-          rows.push(rows[idx]);
-          this.setState({ rows: rows });
-        }, 100)
+          const newObj = {};
+          Object.assign(newObj, rows[idx])
+          newObj.extra.visible=true;
+          rows.push(newObj);
+          this.setState({ rows: rows }, this.filters.filter());
+        }, 10)
       });
     } else {
       clearInterval(this.state.interval);
@@ -135,6 +138,7 @@ class Table extends React.Component {
             {this.state.interval ? "Stop " : "Start "}loading rows
           </button>{" "}
           Rows: {this.state.rows.length}{" "}
+          Filtered: {this.state.rows.filter(r=>r.extra.visible).length}{" "}
         </div>
         <Measure bounds onResize={d => this.setState({ width: d.width })}>
           {({ contentRect, measureRef }) => <div ref={measureRef} />}
