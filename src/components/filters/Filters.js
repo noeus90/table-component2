@@ -49,7 +49,7 @@ class Filters {
             return (
               !constraint.value ||
               !constraint.value.length ||
-              (cellData && cellData.includes(constraint.value))
+              (cellData && cellData.toLowerCase().includes(constraint.value.toLowerCase()))
             );
           }
         };

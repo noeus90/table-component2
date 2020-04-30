@@ -13,33 +13,32 @@ class Row extends React.Component {
     const { data, widths, index, color } = this.props;
     const rowData = data,
       i = index;
-
     return (
-        <tr key={i} className={color}>
-          {this.props.children.map((column, j) => {
-            let value;
-            if (typeof column.props.dataKey === "function") {
-              value = column.props.dataKey(rowData);
-            } else {
-              value = rowData[column.props.dataKey];
-            }
+      <div key={i} className={"row " + color} draggable>
+        {this.props.children.map((column, j) => {
+          let value;
+          if (typeof column.props.dataKey === "function") {
+            value = column.props.dataKey(rowData);
+          } else {
+            value = rowData[column.props.dataKey];
+          }
 
-            if (column.props.treatment) {
-              value = column.props.treatment(value);
-            }
-            return (
-              <Cell
-                key={i + "-" + j}
-                className={this.props.rowDensity}
-                value={value}
-                width={widths[j]}
-                visible={this.props.cols[j].extra.visible}
-              />
-            );
-          })}
-          {this.props.actions &&
-            this.buildActions(rowData, i, widths[widths.length - 1])}
-        </tr>
+          if (column.props.treatment) {
+            value = column.props.treatment(value);
+          }
+          return (
+            <Cell
+              key={i + "-" + j}
+              className={this.props.rowDensity}
+              value={value}
+              width={widths[j]}
+              visible={this.props.cols[j].extra.visible}
+            />
+          );
+        })}
+        {this.props.actions &&
+          this.buildActions(rowData, i, widths[widths.length - 1])}
+      </div>
     );
   }
 

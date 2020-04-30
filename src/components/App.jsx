@@ -2,7 +2,7 @@ import React from "react";
 import Table from "./Table";
 import Column from "./Column";
 import Draggable from "react-draggable";
-import data from "../data/easyTests";
+import data from "../data/large2k";
 
 class App extends React.Component {
   constructor(props) {
@@ -31,11 +31,11 @@ class App extends React.Component {
           <table>
             <tbody>
               <tr>
-                <td>StickyHeader</td>
+                <td><strike>StickyHeader</strike></td>
                 <td>
                   <input
                     type="checkbox"
-                    checked={this.state.stickyHeader}
+                    checked={true}
                     onChange={() =>
                       this.setState({ stickyHeader: !this.state.stickyHeader })
                     }
@@ -150,7 +150,7 @@ class App extends React.Component {
         <br />
         <div id="container200" className="section">
           <Table
-            data={data}
+            data={[...data,...data,...data,...data]}
             stickyHeader={this.state.stickyHeader}
             zebraStyle={this.state.zebraStyle}
             afterRow={row => `My default after row: Name → ${row.nombre}`}

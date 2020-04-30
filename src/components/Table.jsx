@@ -6,6 +6,8 @@ import Column from "./Column";
 import Filters from "./filters/Filters";
 import FiltersContainer from "./filters/FiltersContainer";
 import ShowHideFilter from "./filters/ShowHideFilter";
+import { FixedSizeList as List } from "react-window";
+import Measure from "react-measure";
 
 class Table extends React.Component {
   constructor(props) {
@@ -13,7 +15,10 @@ class Table extends React.Component {
     //console.log(props);
 
     this.state = {
-      rows: [],
+      rows: props.data.map(row => ({
+        row: row,
+        extra: { visible: true }
+      })),
       cols: props.children.map((column, i) => ({
         name: column.props.name,
         extra: {
@@ -24,12 +29,16 @@ class Table extends React.Component {
       customAfterRow: [],
       showFilters: false,
       pageSize: this.props.pagination.pageSize || 2,
-      currentPage: 0
+      currentPage: 0,
+      width: 0,
+      loading: false
     };
+    this.interval = null;
     this.sort = this.sort.bind(this);
     this.filters = new Filters(() => this.state.rows, () => this.forceUpdate());
     this.openAfterRow = this.openAfterRow.bind(this);
     this.buildUtils = this.buildUtils.bind(this);
+    this.loadRows = this.loadRows.bind(this);
   }
 
   recursive = () => {
@@ -46,7 +55,11 @@ class Table extends React.Component {
   };
 
   componentDidMount() {
-    this.recursive();
+    //this.recursive();
+    this.setState({
+      width: this.container.offsetWidth,
+      height: this.container.offsetHeight
+    });
   }
 
   calculateWeightSum() {
@@ -71,12 +84,33 @@ class Table extends React.Component {
     return widths;
   }
 
+  loadRows() {
+    if (!this.interval) {
+      this.interval = setInterval(() => {
+        const rows = this.state.rows;
+        const idx = Math.floor(Math.random() * rows.length);
+        rows.splice(0, 0, rows[idx]);
+        this.setState({ rows: rows });
+      }, 10);
+    } else {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
+
   render() {
     const pages = Math.ceil(this.props.data.length / this.state.pageSize);
     const widths = this.calculateWidths();
     this.props.children.forEach(column => {
       this.filters.addFilter(column.props);
     });
+    const itemHeight =
+      18 +
+      (this.props.rowDensity === "default"
+        ? 20
+        : this.props.rowDensity === "compact"
+        ? 10
+        : 30);
     this.filters.addFilter({
       type: "text",
       name: "Hide columns",
@@ -93,6 +127,16 @@ class Table extends React.Component {
     });
     return (
       <div className="tableContainer">
+        <div className="table">
+          <button onClick={this.loadRows}>
+            {this.state.loading ? "Stop " : "Start "}loading rows
+          </button>{" "}
+          Rows: {this.state.rows.length}{" "}
+        </div>
+        <Measure bounds onResize={d => this.setState({ width: d.width })}>
+          {({ contentRect, measureRef }) => <div ref={measureRef} />}
+        </Measure>
+        <div ref={el => (this.container = el)} />
         <p className={this.props.pagination ? "" : "hide"}>
           <label>
             Rows per page:{" "}
@@ -128,37 +172,26 @@ class Table extends React.Component {
             </button>
           </label>
         </p>
-        <p>
-          <label>
-            Filtros{" "}
-            <input
-              type="checkbox"
-              value={this.state.showFilters}
-              onChange={evt =>
-                this.setState({ showFilters: evt.target.checked })
-              }
-            />
-          </label>
-        </p>
 
         {
           <FiltersContainer
-            visible={this.state.showFilters}
+            visible={true}
             columns={this.state.cols}
             filters={this.filters.getFilters()}
             widths={widths}
           />
         }
 
-        <table className="visibleRows">
-          <thead>
-            <tr>
+        <div className={"table " + (this.props.stickyHeader && "scrollable")}>
+          <div>
+            <div className="row">
               {this.props.children.map((column, i) => {
                 return React.cloneElement(column, {
                   key: column.props.dataKey,
                   width: widths[i],
                   sortCb: this.sort,
-                  visible: this.state.cols[i].extra.visible
+                  visible: this.state.cols[i].extra.visible,
+                  rowDensity: this.props.rowDensity
                 });
               })}
               {this.props.actions && (
@@ -167,59 +200,72 @@ class Table extends React.Component {
                   visible={true}
                   name={" "}
                   width={widths[widths.length - 1]}
+                  rowDensity={this.props.rowDensity}
                 />
               )}
-            </tr>
-          </thead>
-          <tbody className={this.props.stickyHeader ? "scrollable" : ""}>
-            {this.state.rows.map((row, i) => {
-              if (
-                this.props.pagination &&
-                i < this.state.currentPage * this.state.pageSize
-              )
-                return null;
-              if (
-                this.props.pagination &&
-                i + 1 >
-                  this.state.currentPage * this.state.pageSize +
-                    this.state.pageSize
-              )
-                return null;
-              if (!row.extra.visible) return null;
+            </div>
+          </div>
+          <List
+            className="List"
+            height={230}
+            itemCount={
+              this.props.pagination
+                ? this.state.pageSize
+                : this.state.rows.filter(r => r.extra.visible).length
+            }
+            itemSize={itemHeight}
+            width={this.state.width}
+          >
+            {({ index, style }) => {
+              const rows = this.state.rows.filter(r => r.extra.visible);
+              const row = this.props.pagination
+                ? rows[this.state.currentPage * this.state.pageSize + index]
+                : rows[index];
               const rowData = row.row;
-              return [
-                <Row
-                  data={rowData}
-                  widths={widths}
-                  index={i}
-                  color={this.props.zebraStyle && i % 2 ? "green" : "white"}
-                  children={this.props.children}
-                  cols={this.state.cols}
-                  afterRows={this.state.customAfterRow}
-                  actions={this.props.actions}
-                  buildUtils={this.buildUtils}
-                />,
-                this.state.customAfterRow[i] ? (
-                  <tr className={this.props.zebraStyle && i % 2 ? "green" : "white"}>
-                    <Cell
-                      key={"AR"}
-                      visible={true}
-                      className="afterRow"
-                      colSpan={3}
-                      value={
-                        <div>
-                          {typeof this.state.customAfterRow[i] === "function"
-                            ? this.state.customAfterRow[i](rowData)
-                            : this.state.customAfterRow[i]}
-                        </div>
+              return (
+                <div className={row} style={style}>
+                  <Row
+                    data={rowData}
+                    widths={widths}
+                    index={index}
+                    color={
+                      this.props.zebraStyle && index % 2 ? "green" : "white"
+                    }
+                    children={this.props.children}
+                    cols={this.state.cols}
+                    afterRows={this.state.customAfterRow}
+                    actions={this.props.actions}
+                    buildUtils={this.buildUtils}
+                    rowDensity={this.props.rowDensity}
+                  />
+
+                  {this.state.customAfterRow[index] && (
+                    <div
+                      className={
+                        this.props.zebraStyle && index % 2 ? "green" : "white"
                       }
-                    />
-                  </tr>
-                ) : null
-              ];
-            })}
-          </tbody>
-        </table>
+                    >
+                      <Cell
+                        key={"AR"}
+                        visible={true}
+                        className="afterRow"
+                        colSpan={3}
+                        value={
+                          <div>
+                            {typeof this.state.customAfterRow[index] ===
+                            "function"
+                              ? this.state.customAfterRow[index](rowData)
+                              : this.state.customAfterRow[index]}
+                          </div>
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          </List>
+        </div>
       </div>
     );
   }
