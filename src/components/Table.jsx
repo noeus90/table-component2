@@ -6,7 +6,7 @@ import Column from "./Column";
 import Filters from "./filters/Filters";
 import FiltersContainer from "./filters/FiltersContainer";
 import ShowHideFilter from "./filters/ShowHideFilter";
-import { FixedSizeList as List } from "react-window";
+import { VariableSizeList as List } from "react-window";
 import Measure from "react-measure";
 
 class Table extends React.Component {
@@ -52,6 +52,7 @@ class Table extends React.Component {
     this.openAfterRow = this.openAfterRow.bind(this);
     this.buildUtils = this.buildUtils.bind(this);
     this.loadRows = this.loadRows.bind(this);
+    this.getCustomAfterRow = this.getCustomAfterRow.bind(this);
   }
 
   recursive = () => {
@@ -105,8 +106,8 @@ class Table extends React.Component {
           const idx = Math.floor(Math.random() * rows.length);
           //rows.splice(0, 0, rows[idx]);
           const newObj = {};
-          Object.assign(newObj, rows[idx])
-          newObj.extra.visible=true;
+          Object.assign(newObj, rows[idx]);
+          newObj.extra.visible = true;
           rows.push(newObj);
           this.setState({ rows: rows }, this.filters.filter());
         }, 10)
@@ -115,6 +116,10 @@ class Table extends React.Component {
       clearInterval(this.state.interval);
       this.setState({ interval: null });
     }
+  }
+
+  getCustomAfterRow(idx) {
+    return this.state.customAfterRow[idx];
   }
 
   render() {
@@ -137,8 +142,8 @@ class Table extends React.Component {
           <button onClick={this.loadRows}>
             {this.state.interval ? "Stop " : "Start "}loading rows
           </button>{" "}
-          Rows: {this.state.rows.length}{" "}
-          Filtered: {this.state.rows.filter(r=>r.extra.visible).length}{" "}
+          Rows: {this.state.rows.length} Filtered:{" "}
+          {this.state.rows.filter(r => r.extra.visible).length}{" "}
         </div>
         <Measure bounds onResize={d => this.setState({ width: d.width })}>
           {({ contentRect, measureRef }) => <div ref={measureRef} />}
@@ -213,6 +218,7 @@ class Table extends React.Component {
             </div>
           </div>
           <List
+            ref={el => (this.list = el)}
             className="List"
             height={230}
             itemCount={
@@ -220,7 +226,9 @@ class Table extends React.Component {
                 ? this.state.pageSize
                 : this.state.rows.filter(r => r.extra.visible).length
             }
-            itemSize={itemHeight}
+            itemSize={idx =>
+              this.getCustomAfterRow(idx) ? 2 * itemHeight : itemHeight
+            }
             width={this.state.width}
           >
             {({ index, style }) => {
@@ -229,6 +237,7 @@ class Table extends React.Component {
                 ? rows[this.state.currentPage * this.state.pageSize + index]
                 : rows[index];
               const rowData = row.row;
+
               return (
                 <div className={row} style={style}>
                   <Row
@@ -240,7 +249,6 @@ class Table extends React.Component {
                     }
                     children={this.props.children}
                     cols={this.state.cols}
-                    afterRows={this.state.customAfterRow}
                     actions={this.props.actions}
                     buildUtils={this.buildUtils}
                     rowDensity={this.props.rowDensity}
@@ -286,14 +294,14 @@ class Table extends React.Component {
       arr[rowIdx] = false;
     }
     const newState = { customAfterRow: arr };
-    this.setState(newState);
+    this.setState(newState, this.list.resetAfterIndex(rowIdx));
   }
 
   closeAfterRow(rowIdx) {
     const arr = this.state.customAfterRow;
     arr[rowIdx] = false;
     const newState = { customAfterRow: arr };
-    this.setState(newState);
+    this.setState(newState,this.list.resetAfterIndex(rowIdx));
   }
 
   buildUtils(rowIdx) {
