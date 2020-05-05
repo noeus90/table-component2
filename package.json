@@ -1,14 +1,16 @@
 {
-  "name": "develop-serlox",
+  "name": "drag-and-drop",
   "version": "0.0.2164",
   "description": "",
   "keywords": [],
   "main": "index.js",
   "dependencies": {
-    "react": "15.5.3",
-    "react-dom": "15.5.3",
+    "array-move": "2.2.1",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
     "react-draggable": "4.3.1",
     "react-measure": "2.3.0",
+    "react-sortable-hoc": "1.11.0",
     "react-window": "1.8.5"
   },
   "devDependencies": {

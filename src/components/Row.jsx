@@ -14,7 +14,7 @@ class Row extends React.Component {
     const rowData = data,
       i = index;
     return (
-      <div key={i} className={"row " + color} draggable>
+      <div key={i} className={"row " + color}>
         {this.props.children.map((column, j) => {
           let value;
           if (typeof column.props.dataKey === "function") {

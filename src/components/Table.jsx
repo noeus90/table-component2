@@ -8,6 +8,11 @@ import FiltersContainer from "./filters/FiltersContainer";
 import ShowHideFilter from "./filters/ShowHideFilter";
 import { FixedSizeList as List } from "react-window";
 import Measure from "react-measure";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import arrayMove from "array-move";
+
+const SortableItem = SortableElement(({ children }) => children);
+const SortableList = SortableContainer(({ children }) => children);
 
 class Table extends React.Component {
   constructor(props) {
@@ -26,6 +31,7 @@ class Table extends React.Component {
           filtrable: () => this.props.children[i].props.filtrable
         }
       })),
+      order: props.children.map((_, index) => index),
       customAfterRow: [],
       showFilters: false,
       pageSize: this.props.pagination.pageSize || 2,
@@ -52,7 +58,30 @@ class Table extends React.Component {
     this.openAfterRow = this.openAfterRow.bind(this);
     this.buildUtils = this.buildUtils.bind(this);
     this.loadRows = this.loadRows.bind(this);
+    this.onSortEnd = this.onSortEnd.bind(this);
   }
+
+  onSortEnd = ({ oldIndex, newIndex }) => {
+    let fun = (a, posI, posF) => {
+      const max = Math.max(posI, posF);
+      const min = Math.min(posI, posF);
+      const inc = posF < posI ? 1 : -1;
+      return a.map(x => {
+        if (x > max || x < min) {
+          return x;
+        }
+        if (x === posI) {
+          return posF;
+        }
+        return x + inc;
+      });
+    };
+
+    this.setState(oldState => ({
+      ...oldState,
+      order: fun(oldState.order, oldIndex, newIndex)
+    }));
+  };
 
   recursive = () => {
     setTimeout(() => {
@@ -105,8 +134,8 @@ class Table extends React.Component {
           const idx = Math.floor(Math.random() * rows.length);
           //rows.splice(0, 0, rows[idx]);
           const newObj = {};
-          Object.assign(newObj, rows[idx])
-          newObj.extra.visible=true;
+          Object.assign(newObj, rows[idx]);
+          newObj.extra.visible = true;
           rows.push(newObj);
           this.setState({ rows: rows }, this.filters.filter());
         }, 10)
@@ -120,9 +149,6 @@ class Table extends React.Component {
   render() {
     const pages = Math.ceil(this.props.data.length / this.state.pageSize);
     const widths = this.calculateWidths();
-    this.props.children.forEach(column => {
-      this.filters.addFilter(column.props);
-    });
     const itemHeight =
       18 +
       (this.props.rowDensity === "default"
@@ -131,14 +157,28 @@ class Table extends React.Component {
         ? 10
         : 30);
 
+    //TODO: Mover esto al estado
+    const sortedChildren = this.props.children
+      .map((value, index) => [value, this.state.order[index]])
+      .sort((m1, m2) => m1[1] - m2[1])
+      .map(m => m[0]);
+
+    const sortedCols = this.state.cols
+      .map((value, index) => [value, this.state.order[index]])
+      .sort((m1, m2) => m1[1] - m2[1])
+      .map(m => m[0]);
+    sortedChildren.forEach(column => {
+      this.filters.addFilter(column.props);
+    });
+
     return (
       <div className="tableContainer">
         <div className="table">
           <button onClick={this.loadRows}>
             {this.state.interval ? "Stop " : "Start "}loading rows
           </button>{" "}
-          Rows: {this.state.rows.length}{" "}
-          Filtered: {this.state.rows.filter(r=>r.extra.visible).length}{" "}
+          Rows: {this.state.rows.length} Filtered:{" "}
+          {this.state.rows.filter(r => r.extra.visible).length}{" "}
         </div>
         <Measure bounds onResize={d => this.setState({ width: d.width })}>
           {({ contentRect, measureRef }) => <div ref={measureRef} />}
@@ -183,7 +223,7 @@ class Table extends React.Component {
         {
           <FiltersContainer
             visible={true}
-            columns={this.state.cols}
+            columns={sortedCols}
             filters={this.filters.getFilters()}
             widths={widths}
           />
@@ -191,26 +231,38 @@ class Table extends React.Component {
 
         <div className={"table " + (this.props.stickyHeader && "scrollable")}>
           <div>
-            <div className="row">
-              {this.props.children.map((column, i) => {
-                return React.cloneElement(column, {
-                  key: column.props.dataKey,
-                  width: widths[i],
-                  sortCb: this.sort,
-                  visible: this.state.cols[i].extra.visible,
-                  rowDensity: this.props.rowDensity
-                });
-              })}
-              {this.props.actions && (
-                <Column
-                  key="actions + i"
-                  visible={true}
-                  name={" "}
-                  width={widths[widths.length - 1]}
-                  rowDensity={this.props.rowDensity}
-                />
-              )}
-            </div>
+            <SortableList onSortEnd={this.onSortEnd} axis={"x"}>
+              <div className="row">
+                {sortedChildren.map((column, i) => {
+                  const children = React.cloneElement(column, {
+                    key: column.props.dataKey,
+                    width: widths[i],
+                    sortCb: this.sort,
+                    visible: this.state.cols[i].extra.visible,
+                    rowDensity: this.props.rowDensity
+                  });
+                  return (
+                    <SortableItem key={column.props.dataKey} index={i}>
+                      {children}
+                    </SortableItem>
+                  );
+                })}
+                {this.props.actions && (
+                  <SortableItem
+                    index={this.props.children.length}
+                    disabled={true}
+                  >
+                    <Column
+                      key="actions + i"
+                      visible={true}
+                      name={" "}
+                      width={widths[widths.length - 1]}
+                      rowDensity={this.props.rowDensity}
+                    />
+                  </SortableItem>
+                )}
+              </div>
+            </SortableList>
           </div>
           <List
             className="List"
@@ -238,8 +290,8 @@ class Table extends React.Component {
                     color={
                       this.props.zebraStyle && index % 2 ? "green" : "white"
                     }
-                    children={this.props.children}
-                    cols={this.state.cols}
+                    children={sortedChildren}
+                    cols={sortedCols}
                     afterRows={this.state.customAfterRow}
                     actions={this.props.actions}
                     buildUtils={this.buildUtils}

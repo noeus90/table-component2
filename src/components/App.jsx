@@ -31,7 +31,9 @@ class App extends React.Component {
           <table>
             <tbody>
               <tr>
-                <td><strike>StickyHeader</strike></td>
+                <td>
+                  <strike>StickyHeader</strike>
+                </td>
                 <td>
                   <input
                     type="checkbox"
@@ -150,7 +152,7 @@ class App extends React.Component {
         <br />
         <div id="container200" className="section">
           <Table
-            data={[...data,...data,...data,...data]}
+            data={[...data, ...data, ...data, ...data]}
             stickyHeader={this.state.stickyHeader}
             zebraStyle={this.state.zebraStyle}
             afterRow={row => `My default after row: Name → ${row.nombre}`}
@@ -202,8 +204,12 @@ class App extends React.Component {
               filtrable={this.state.filtrable[2]}
               treatment={obj => <b>{obj && "*** " + obj + " ***"}</b>}
             />
-
             <Column
+              style={{
+                width: "min-content",
+                display: "inline-block",
+                position: "relative"
+              }}
               name="Documento de identidad"
               type="text"
               dataKey="dni"
