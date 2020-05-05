@@ -1,55 +1,106 @@
 import React from "react";
 import Table from "./Table";
 import Column from "./Column";
+import Draggable from "react-draggable";
+import data from "../data/large2k";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       zebraStyle: true,
-      stickyHeader: false,
+      stickyHeader: true,
+      pagination: false,
+      rowDensity: "default",
       weight: [],
-      sortable: []
+      sortable: [],
+      filtrable: [],
+      drag: { x: 0, y: 0 }
     };
   }
+
+  onControlledDrag = (e, position) => {
+    this.setState({ drag: position });
+  };
 
   render() {
     const cols = [1, 2, 3];
     return (
       <div>
         <div id="settings" className="section">
-          <p>
-            <label>{"StickyHeader: "}</label>
-            <input
-              type="checkbox"
-              checked={this.state.stickyHeader}
-              onChange={() =>
-                this.setState({ stickyHeader: !this.state.stickyHeader })
-              }
-            />
-            <br />
-            <label>{"ZebraStyle: "}</label>
-            <input
-              type="checkbox"
-              checked={this.state.zebraStyle}
-              onChange={() =>
-                this.setState({ zebraStyle: !this.state.zebraStyle })
-              }
-            />
-            <br />
+          <table>
+            <tbody>
+              <tr>
+                <td><strike>StickyHeader</strike></td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={true}
+                    onChange={() =>
+                      this.setState({ stickyHeader: !this.state.stickyHeader })
+                    }
+                  />
+                </td>
+                <td>RowDensity</td>
+                <td>
+                  <select
+                    value={this.state.rowDensity}
+                    onChange={evt =>
+                      this.setState({ rowDensity: evt.target.value })
+                    }
+                  >
+                    <option>default</option>
+                    <option>compact</option>
+                    <option>comfortable</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>ZebraStyle</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={this.state.zebraStyle}
+                    onChange={() =>
+                      this.setState({ zebraStyle: !this.state.zebraStyle })
+                    }
+                  />
+                </td>
+                <td />
+                <td />
+              </tr>
+              <tr>
+                <td>Pagination</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={this.state.pagination}
+                    onChange={() =>
+                      this.setState({ pagination: !this.state.pagination })
+                    }
+                  />
+                </td>
+                <td />
+                <td />
+              </tr>
+            </tbody>
+          </table>
 
-            <table>
+          <br />
+          <table>
+            <tbody>
               <tr>
                 <td />
                 {cols.map(i => (
-                  <th>Column {i}</th>
+                  <th key={i}>Column {i}</th>
                 ))}
               </tr>
               <tr>
                 <th>weight</th>
                 {cols.map(i => (
-                  <td>
+                  <th key={i}>
                     <input
+                      style={{ width: "40px" }}
                       type="number"
                       value={this.state.weight[i] || 1}
                       onChange={evt => {
@@ -58,13 +109,13 @@ class App extends React.Component {
                         this.setState({ weight: weight });
                       }}
                     />
-                  </td>
+                  </th>
                 ))}
               </tr>
               <tr>
                 <th>sortable</th>
                 {cols.map(i => (
-                  <td>
+                  <th key={i}>
                     <input
                       type="checkbox"
                       checked={this.state.sortable[i]}
@@ -74,19 +125,38 @@ class App extends React.Component {
                         this.setState({ sortable: sortable });
                       }}
                     />
-                  </td>
+                  </th>
                 ))}
               </tr>
-            </table>
-          </p>
+              <tr>
+                <th>filterable</th>
+                {cols.map(i => (
+                  <th key={i}>
+                    <input
+                      type="checkbox"
+                      checked={this.state.filtrable[i]}
+                      onChange={evt => {
+                        const filtrable = this.state.filtrable;
+                        filtrable[i] = !filtrable[i];
+                        this.setState({ filtrable: filtrable });
+                      }}
+                    />
+                  </th>
+                ))}
+              </tr>
+            </tbody>
+          </table>
         </div>
         <br />
         <div id="container200" className="section">
           <Table
-            data={data}
+            data={[...data,...data,...data,...data]}
             stickyHeader={this.state.stickyHeader}
             zebraStyle={this.state.zebraStyle}
-            afterRow={row => "My default after row: Name → " + row.nombre}
+            afterRow={row => `My default after row: Name → ${row.nombre}`}
+            globalFilter={this.state.globalFilter}
+            pagination={this.state.pagination && { pageSize: 2 }}
+            rowDensity={this.state.rowDensity}
             actions={[
               {
                 text: "apellido",
@@ -109,30 +179,40 @@ class App extends React.Component {
                     <div>
                       Dynamic after row: Letra dni → {row.dni.letra}
                       <button onClick={utils.closeAfterRow}>x</button>
-                     </div>
+                    </div>
                   )
               }
             ]}
           >
             <Column
               name="Nombre"
+              type="text"
               dataKey={row => row.alias || row.nombre}
               weight={this.state.weight[1] || 1}
               sortable={this.state.sortable[1]}
+              filtrable={this.state.filtrable[1]}
             />
 
             <Column
               name="Apellido"
+              type="text"
               dataKey="apellido"
               weight={this.state.weight[2] || 1}
               sortable={this.state.sortable[2]}
+              filtrable={this.state.filtrable[2]}
               treatment={obj => <b>{obj && "*** " + obj + " ***"}</b>}
             />
 
             <Column
               name="Documento de identidad"
+              type="text"
               dataKey="dni"
               sortable={this.state.sortable[3]}
+              filtrable={this.state.filtrable[3]}
+              filterFn={(obj, constraint) =>
+                !constraint.checked || obj.letra === "A"
+              }
+              filterView={<input type="checkbox" />}
               sortFn={(a, b) =>
                 b.letra === a.letra ? 0 : b.letra > a.letra ? 1 : -1
               }
@@ -141,51 +221,43 @@ class App extends React.Component {
             />
           </Table>
         </div>
+        <br />
+        <p>Drag the bar</p>
+        <div className="section">
+          <span
+            style={{
+              display: "inline-block",
+              border: "1px solid black",
+              position: "relative"
+            }}
+          >
+            Header 1
+          </span>
+          <Draggable axis="x" bounds="parent" onDrag={this.onControlledDrag}>
+            <div
+              style={{
+                width: "min-content",
+                display: "inline-block",
+                position: "relative"
+              }}
+            >
+              <b style={{ color: "red", cursor: "ew-resize" }}>|</b>
+            </div>
+          </Draggable>
+          <span
+            style={{
+              display: "inline-block",
+              border: "1px solid black",
+              left: this.state.drag.x,
+              position: "relative"
+            }}
+          >
+            Header 2
+          </span>
+        </div>
       </div>
     );
   }
 }
-
-const data = [
-  {
-    nombre: "David",
-    apellido: "Piñeiro",
-    dni: { numero: "123", letra: "A" }
-  },
-  {
-    nombre: "Noelia",
-    apellido: "Urrutia",
-    dni: { numero: "456", letra: "B" }
-  },
-  {
-    nombre: "Sergio",
-    apellido: "López",
-    dni: { numero: "789", letra: "C" },
-    alias: "This is my Alias"
-  },
-  {
-    nombre: "Pepe",
-    apellido: "Castro",
-    dni: { numero: "111", letra: "S" }
-  },
-  {
-    nombre: "María",
-    apellido: "Magdalena",
-    dni: { numero: "000", letra: "P" }
-  },
-  {
-    nombre: "Sinosuke",
-    apellido: "Nohara",
-    dni: { numero: "222", letra: "L" }
-  },
-  {
-    nombre: "Batman",
-    dni: { numero: "001", letra: "B" }
-  },
-  {
-    nombre: "Spiderman",
-    dni: { numero: "999", letra: "S" }
-  }
-];
 
 module.exports = App;

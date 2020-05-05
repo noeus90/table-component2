@@ -9,16 +9,18 @@ class Cell extends React.Component {
   }
 
   render() {
+    if (!this.props.visible) return null;
     return (
-      <td {...this.props} style={{ width: this.props.width }}>
-        {this.props.value}
-      </td>
+      <div className={"cell " +this.props.className} style={{ width: this.props.width }}>
+          {this.props.value}
+      </div>
     );
   }
 }
 
 Cell.propTypes = {
-  value: PropTypes.any.isRequired
+  value: PropTypes.any.isRequired,
+  visible: PropTypes.bool
 };
 
 module.exports = Cell;

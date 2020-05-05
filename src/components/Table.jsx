@@ -1,7 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Row from "./Row";
 import Cell from "./Cell";
 import Column from "./Column";
+import Filters from "./filters/Filters";
+import FiltersContainer from "./filters/FiltersContainer";
+import ShowHideFilter from "./filters/ShowHideFilter";
+import { VariableSizeList as List } from "react-window";
+import Measure from "react-measure";
 
 class Table extends React.Component {
   constructor(props) {
@@ -9,13 +15,65 @@ class Table extends React.Component {
     //console.log(props);
 
     this.state = {
-      rows: this.props.data,
-      customAfterRow: []
+      rows: props.data.map(row => ({
+        row: row,
+        extra: { visible: true }
+      })),
+      cols: props.children.map((column, i) => ({
+        name: column.props.name,
+        extra: {
+          visible: true,
+          filtrable: () => this.props.children[i].props.filtrable
+        }
+      })),
+      customAfterRow: [],
+      showFilters: false,
+      pageSize: this.props.pagination.pageSize || 2,
+      currentPage: 0,
+      width: 0,
+      interval: null
     };
     this.sort = this.sort.bind(this);
-    this.buildActions = this.buildActions.bind(this);
+    this.filters = new Filters(() => this.state.rows, () => this.forceUpdate());
+    this.filters.addFilter({
+      type: "text",
+      name: "Hide columns",
+      filterView: (
+        <ShowHideFilter columns={this.props.children.map(c => c.props.name)} />
+      ),
+      filterFn: (rows, constraint) => {
+        this.state.cols.forEach(
+          (col, i) => (col.extra.visible = !constraint[i])
+        );
+        return true;
+      },
+      filtrable: true
+    });
     this.openAfterRow = this.openAfterRow.bind(this);
     this.buildUtils = this.buildUtils.bind(this);
+    this.loadRows = this.loadRows.bind(this);
+    this.getCustomAfterRow = this.getCustomAfterRow.bind(this);
+  }
+
+  recursive = () => {
+    setTimeout(() => {
+      let hasMore = this.state.rows.length + 1 < this.props.data.length;
+      this.setState((prev, props) => ({
+        rows: props.data.slice(0, prev.rows.length + 1).map(row => ({
+          row: row,
+          extra: { visible: true }
+        }))
+      }));
+      if (hasMore) this.recursive();
+    }, 0);
+  };
+
+  componentDidMount() {
+    //this.recursive();
+    this.setState({
+      width: this.container.offsetWidth,
+      height: this.container.offsetHeight
+    });
   }
 
   calculateWeightSum() {
@@ -29,77 +87,200 @@ class Table extends React.Component {
 
   calculateWidths() {
     const weightSum = this.calculateWeightSum();
-    return this.props.children.map(child => {
+    const widths = this.props.children.map(child => {
       const modifier = this.props.actions ? 0.95 : 1;
       const percentage = ((child.props.weight || 1) * 100) / weightSum;
       return percentage * modifier + "%";
     });
+    if (this.props.actions) {
+      widths.push("5%");
+    }
+    return widths;
+  }
+
+  loadRows() {
+    if (!this.state.interval) {
+      this.setState({
+        interval: setInterval(() => {
+          const rows = this.state.rows;
+          const idx = Math.floor(Math.random() * rows.length);
+          //rows.splice(0, 0, rows[idx]);
+          const newObj = {};
+          Object.assign(newObj, rows[idx]);
+          newObj.extra.visible = true;
+          rows.push(newObj);
+          this.setState({ rows: rows }, this.filters.filter());
+        }, 10)
+      });
+    } else {
+      clearInterval(this.state.interval);
+      this.setState({ interval: null });
+    }
+  }
+
+  getCustomAfterRow(idx) {
+    return this.state.customAfterRow[idx];
   }
 
   render() {
+    const pages = Math.ceil(this.props.data.length / this.state.pageSize);
     const widths = this.calculateWidths();
+    this.props.children.forEach(column => {
+      this.filters.addFilter(column.props);
+    });
+    const itemHeight =
+      18 +
+      (this.props.rowDensity === "default"
+        ? 20
+        : this.props.rowDensity === "compact"
+        ? 10
+        : 30);
+
     return (
       <div className="tableContainer">
-        <table>
-          <thead>
-            <tr>
+        <div className="table">
+          <button onClick={this.loadRows}>
+            {this.state.interval ? "Stop " : "Start "}loading rows
+          </button>{" "}
+          Rows: {this.state.rows.length} Filtered:{" "}
+          {this.state.rows.filter(r => r.extra.visible).length}{" "}
+        </div>
+        <Measure bounds onResize={d => this.setState({ width: d.width })}>
+          {({ contentRect, measureRef }) => <div ref={measureRef} />}
+        </Measure>
+        <div ref={el => (this.container = el)} />
+        <p className={this.props.pagination ? "" : "hide"}>
+          <label>
+            Rows per page:{" "}
+            <input
+              type="number"
+              value={this.state.pageSize}
+              onChange={evt =>
+                this.setState({ pageSize: parseInt(evt.target.value, 10) })
+              }
+              style={{ width: "40px" }}
+            />
+          </label>{" "}
+          <label>
+            Page:{" "}
+            <button
+              onClick={evt =>
+                this.setState({
+                  currentPage:
+                    this.state.currentPage && this.state.currentPage - 1
+                })
+              }
+            >
+              {"<"}
+            </button>
+            {this.state.currentPage + 1 + "/" + pages}
+            <button
+              onClick={evt =>
+                this.state.currentPage + 1 < pages &&
+                this.setState({ currentPage: this.state.currentPage + 1 })
+              }
+            >
+              {">"}
+            </button>
+          </label>
+        </p>
+
+        {
+          <FiltersContainer
+            visible={true}
+            columns={this.state.cols}
+            filters={this.filters.getFilters()}
+            widths={widths}
+          />
+        }
+
+        <div className={"table " + (this.props.stickyHeader && "scrollable")}>
+          <div>
+            <div className="row">
               {this.props.children.map((column, i) => {
                 return React.cloneElement(column, {
+                  key: column.props.dataKey,
                   width: widths[i],
-                  sortCb: this.sort
+                  sortCb: this.sort,
+                  visible: this.state.cols[i].extra.visible,
+                  rowDensity: this.props.rowDensity
                 });
               })}
               {this.props.actions && (
-                <Column key="actions + i" name={" "} width={"5%"} />
+                <Column
+                  key="actions + i"
+                  visible={true}
+                  name={" "}
+                  width={widths[widths.length - 1]}
+                  rowDensity={this.props.rowDensity}
+                />
               )}
-            </tr>
-          </thead>
-          <tbody className={this.props.stickyHeader ? "scrollable" : ""}>
-            {this.state.rows.map((rowData, i) => {
-              return [
-                <tr
-                  key={i}
-                  className={this.props.zebraStyle && i % 2 ? "green" : "white"}
-                >
-                  {this.props.children.map((column, j) => {
-                    //console.log(rowData);
-                    let value;
+            </div>
+          </div>
+          <List
+            ref={el => (this.list = el)}
+            className="List"
+            height={230}
+            itemCount={
+              this.props.pagination
+                ? this.state.pageSize
+                : this.state.rows.filter(r => r.extra.visible).length
+            }
+            itemSize={idx =>
+              this.getCustomAfterRow(idx) ? 2 * itemHeight : itemHeight
+            }
+            width={this.state.width}
+          >
+            {({ index, style }) => {
+              const rows = this.state.rows.filter(r => r.extra.visible);
+              const row = this.props.pagination
+                ? rows[this.state.currentPage * this.state.pageSize + index]
+                : rows[index];
+              const rowData = row.row;
 
-                    if (typeof column.props.dataKey === "function") {
-                      value = column.props.dataKey(rowData);
-                    } else {
-                      value = rowData[column.props.dataKey];
+              return (
+                <div className={row} style={style}>
+                  <Row
+                    data={rowData}
+                    widths={widths}
+                    index={index}
+                    color={
+                      this.props.zebraStyle && index % 2 ? "green" : "white"
                     }
+                    children={this.props.children}
+                    cols={this.state.cols}
+                    actions={this.props.actions}
+                    buildUtils={this.buildUtils}
+                    rowDensity={this.props.rowDensity}
+                  />
 
-                    if (column.props.treatment) {
-                      value = column.props.treatment(value);
-                    }
-                    return (
-                      <Cell key={i + "-" + j} value={value} width={widths[j]} />
-                    );
-                  })}
-                  {this.props.actions && this.buildActions(rowData, i)}
-                </tr>,
-                this.state.customAfterRow[i] ? (
-                  <tr>
-                    <Cell
-                      key={"AR"}
-                      className="afterRow"
-                      colSpan={3}
-                      value={
-                        <div>
-                          {typeof this.state.customAfterRow[i] === "function"
-                            ? this.state.customAfterRow[i](rowData)
-                            : this.state.customAfterRow[i]}
-                        </div>
+                  {this.state.customAfterRow[index] && (
+                    <div
+                      className={
+                        this.props.zebraStyle && index % 2 ? "green" : "white"
                       }
-                    />
-                  </tr>
-                ) : null
-              ];
-            })}
-          </tbody>
-        </table>
+                    >
+                      <Cell
+                        key={"AR"}
+                        visible={true}
+                        className="afterRow"
+                        colSpan={3}
+                        value={
+                          <div>
+                            {typeof this.state.customAfterRow[index] ===
+                            "function"
+                              ? this.state.customAfterRow[index](rowData)
+                              : this.state.customAfterRow[index]}
+                          </div>
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          </List>
+        </div>
       </div>
     );
   }
@@ -113,14 +294,14 @@ class Table extends React.Component {
       arr[rowIdx] = false;
     }
     const newState = { customAfterRow: arr };
-    this.setState(newState);
+    this.setState(newState, this.list.resetAfterIndex(rowIdx));
   }
 
   closeAfterRow(rowIdx) {
     const arr = this.state.customAfterRow;
     arr[rowIdx] = false;
     const newState = { customAfterRow: arr };
-    this.setState(newState);
+    this.setState(newState,this.list.resetAfterIndex(rowIdx));
   }
 
   buildUtils(rowIdx) {
@@ -130,67 +311,11 @@ class Table extends React.Component {
     };
   }
 
-  buildActions(rowData, rowIdx) {
-    return (
-      <Cell
-        key={"actions" + rowIdx}
-        value={
-          <div className="dropup">
-            <button className="dropbtn">⋮</button>
-            <div className="dropup-content">
-              {this.props.actions.reduce((result, action, i) => {
-                let visible;
-                switch (typeof action.visible) {
-                  case "function":
-                    visible = action.visible(rowData);
-                    break;
-                  case "boolean":
-                    visible = action.visible;
-                    break;
-                  default:
-                    visible = true;
-                }
-
-                if (visible) {
-                  let enabled;
-                  switch (typeof action.enabled) {
-                    case "function":
-                      enabled = action.enabled(rowData);
-                      break;
-                    case "boolean":
-                      enabled = action.visible;
-                      break;
-                    default:
-                      enabled = true;
-                  }
-
-                  return result.concat(
-                    <p
-                      key={"action" + i}
-                      style={enabled ? {} : { color: "gray" }}
-                      onClick={() =>
-                        enabled &&
-                        action.action(rowData, this.buildUtils(rowIdx))
-                      }
-                      className="mini"
-                    >
-                      {action.icon} {action.text}
-                    </p>
-                  );
-                }
-                return result;
-              }, [])}
-            </div>
-          </div>
-        }
-        width={"5%"}
-      />
-    );
-  }
-
   sort(sortFn, asc = true) {
     this.setState({
-      rows: this.state.rows.sort(asc ? sortFn : (a, b) => sortFn(b, a))
+      rows: this.state.rows.sort(
+        asc ? (a, b) => sortFn(a.row, b.row) : (a, b) => sortFn(b.row, a.row)
+      )
     });
   }
 }
@@ -203,8 +328,8 @@ Table.propTypes = {
     PropTypes.shape({
       text: PropTypes.string.isRequired,
       icon: PropTypes.string,
-      visible: PropTypes.oneOf([PropTypes.func, PropTypes.bool]),
-      enabled: PropTypes.oneOf([PropTypes.func, PropTypes.bool]),
+      visible: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+      enabled: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
       action: PropTypes.func.isRequired
     })
   ).isRequired

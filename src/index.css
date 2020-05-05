@@ -12,59 +12,78 @@ body {
   font-family: Helvetica;
 }
 
-#settings{
+#settings {
   padding: 10px;
 }
 
-#container200{
-  max-height: 200px;
+#container200 {
+  height: 350px;
   padding: 10px;
 }
 
-
-.tableContainer{
-  height: 200px; /* FIXME to MatchParent */
+.tableContainer {
+  height: 350px; /* FIXME to MatchParent */
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.section{
+.section {
   background: #e8e8e8;
   border: 1px dotted black;
   border-radius: 5px;
   width: 100%;
+  position: relative;
 }
 
 tr > * {
   padding: 5px;
-  border: 1px solid black;
+}
+
+.default {
+  padding: 10px;
+}
+
+.compact {
+  padding: 5px;
+}
+
+.comfortable {
+  padding: 15px;
 }
 
 th {
   background-color: #5e9cff;
 }
 
+.header {
+  background-color: #5e9cff;
+  font-weight: bold;
+}
 
+table.visibleRows tr {
+  border-bottom: 1px solid black;
+}
 
-table, tr, thead, tbody {
+table {
+  border-collapse: collapse;
+}
+
+.filterContainer {
+  background-color: lightgray;
+  border-radius: 5px;
+}
+
+table,
+tr,
+thead,
+tbody {
   width: 100%;
 }
 
-#container200  tr{
-  display: inline-table;
-}
-
-
-#container200 table tbody, table thead
-{
-    display: block;
-}
-
-table tbody.scrollable
-{
+.scrollable {
   overflow-y: overlay;
   overflow-x: hidden;
-  height: 160px;  /* FIXME */
+  height: 120px; /* FIXME */
 }
 
 ::-webkit-scrollbar {
@@ -82,12 +101,28 @@ table tbody.scrollable
   font-size: 10px;
 }
 
-.afterRow{
-  display:table-footer-group;
+.hide {
+  display: none;
 }
-.afterRow > div{
+
+.afterRow {
+  display: table-footer-group;
+}
+.afterRow > div {
   padding: 10px;
-  border: 1px solid black;
+}
+
+.table {
+  display: table;
+  width: 100%;
+}
+.row {
+  display: inline-table;
+  border-top: 1px solid gray;
+  width: 100%;
+}
+.cell {
+  display: table-cell;
 }
 
 .dropbtn {
@@ -119,7 +154,9 @@ table tbody.scrollable
   display: block;
 }
 
-.dropup-content p:hover {background-color: #ccc}
+.dropup-content p:hover {
+  background-color: #ccc;
+}
 
 .dropup:hover .dropup-content {
   display: block;
